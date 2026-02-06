@@ -166,8 +166,8 @@
                     { id: 20, name: "Cone Trufado Brigadeiro", price: 12.00 },
                     { id: 21, name: "Cone Trufado Leite Ninho", price: 12.00 },
                     { id: 22, name: "Cone Trufado Dois Amores", price: 12.00 },
-                    { id: 23, name: "Cone Trufado Maracujá", price: 12.00 },
-                    { id: 24, name: "Cone Trufado Ninho c/ Nutella", price: 12.00 }
+                    { id: 23, name: "Cone Trufado Maracujá", price: 12.00 }
+                    /* Removido Cone Ninho c/ Nutella */
                 ]
             },
             {
@@ -247,11 +247,12 @@
         }
 
         function renderFlavors() {
-            return ['Frango', 'Presunto e Queijo', 'Salsicha'].map(s => `
+            [cite_start]// Removido 'Frango' [cite: 18] da lista
+            return ['Presunto e Queijo', 'Enroladinho de Salsicha'].map(s => `
                 <div class="option-row"><span>${s}</span>
                 <div class="counter-controls">
                     <button class="counter-btn" onclick="updateFlavor('${s}', -1)">-</button>
-                    <span id="q-${s}">0</span>
+                    <span id="q-${s.replace(/ /g,'')}">0</span>
                     <button class="counter-btn" onclick="updateFlavor('${s}', 1)">+</button>
                 </div></div>`).join('');
         }
@@ -263,7 +264,10 @@
             if (delta > 0 && current >= limit) return;
             if (delta < 0 && tempItem.options.flavors[s] <= 0) return;
             tempItem.options.flavors[s] += delta;
-            document.getElementById(`q-${s}`).innerText = tempItem.options.flavors[s];
+            
+            // Fix para ID com espaços
+            const idSafe = s.replace(/ /g,'');
+            document.getElementById(`q-${idSafe}`).innerText = tempItem.options.flavors[s];
         }
 
         function setVar(el, val) {
@@ -319,7 +323,6 @@
                 total += i.price;
                 msg += `✅ *${i.name}*\n`;
                 
-                // Detalhes de sabores (Combo ou Kit)
                 if (i.isKit || i.isCombo) {
                     const flavs = Object.entries(i.options.flavors)
                                     .filter(([_, qty]) => qty > 0)
@@ -333,7 +336,6 @@
                         msg += `   - Sabores: ${flavs}\n`;
                     }
                 } 
-                // Detalhes de bebida simples
                 else if (i.isDrink) {
                     msg += `   - Tipo: ${i.options.variant}\n`;
                 }
