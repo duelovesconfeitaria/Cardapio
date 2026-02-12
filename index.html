@@ -70,7 +70,6 @@ src="https://www.facebook.com/tr?id=25919503551048968&ev=PageView&noscript=1"
             border-left: 6px solid var(--secondary); position: relative;
         }
 
-        /* Estilos específicos para quando o card tem imagem (Combo) */
         .product-card.has-image {
             flex-direction: column;
             align-items: flex-start;
@@ -120,6 +119,11 @@ src="https://www.facebook.com/tr?id=25919503551048968&ev=PageView&noscript=1"
 
         .checkout-btn { width: 100%; background: var(--success); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 15px; }
         .hidden { display: none; }
+
+        /* Estilos do Formulário */
+        .input-field { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.95rem; }
+        .input-row { display: flex; gap: 10px; }
+        .label-form { font-size: 0.9rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
@@ -165,16 +169,30 @@ src="https://www.facebook.com/tr?id=25919503551048968&ev=PageView&noscript=1"
                 <div class="shipping-bar-bg"><div class="shipping-bar-fill" id="shippingBar"></div></div>
             </div>
             <div id="cartItemsContainer" style="margin-top: 15px;"></div>
+            
             <div id="checkoutForm" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
-                <input type="text" id="clientName" placeholder="Seu Nome" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px;">
-                <textarea id="clientAddress" placeholder="Endereço Completo (Rua, Nº, Bairro)" rows="2" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px;"></textarea>
-                <select id="paymentMethod" onchange="toggleChange()" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px;">
+                <label class="label-form">Seus Dados:</label>
+                <input type="text" id="clientName" placeholder="Seu Nome Completo" class="input-field">
+                
+                <label class="label-form">Endereço de Entrega:</label>
+                <input type="text" id="addrStreet" placeholder="Nome da Rua" class="input-field">
+                
+                <div class="input-row">
+                    <input type="text" id="addrNum" placeholder="Número" class="input-field" style="width: 30%;">
+                    <input type="text" id="addrDistrict" placeholder="Bairro" class="input-field" style="flex: 1;">
+                </div>
+                
+                <input type="text" id="addrRef" placeholder="Ponto de Referência (Opcional)" class="input-field">
+
+                <label class="label-form">Pagamento:</label>
+                <select id="paymentMethod" onchange="toggleChange()" class="input-field">
                     <option value="pix">PIX</option>
                     <option value="cartao">Cartão</option>
                     <option value="dinheiro">Dinheiro</option>
                 </select>
-                <input type="tel" id="changeValue" class="hidden" placeholder="Troco para quanto?" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px;">
-                <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                <input type="tel" id="changeValue" class="hidden input-field" placeholder="Troco para quanto?">
+                
+                <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 10px;">
                     <span>Total:</span> <span id="summaryTotal">R$ 0,00</span>
                 </div>
                 <button class="checkout-btn" onclick="finishOrder()">ENVIAR NO WHATSAPP</button>
@@ -212,7 +230,8 @@ src="https://www.facebook.com/tr?id=25919503551048968&ev=PageView&noscript=1"
                     { id: 20, name: "Cone Trufado Brigadeiro", price: 12.00 },
                     { id: 21, name: "Cone Trufado Leite Ninho", price: 12.00 },
                     { id: 22, name: "Cone Trufado Dois Amores", price: 12.00 },
-                    { id: 23, name: "Cone Trufado Maracujá", price: 12.00 }
+                    { id: 23, name: "Cone Trufado Maracujá", price: 12.00 },
+                    { id: 24, name: "Cone Trufado Ninho c/ Nutella", price: 12.00 }
                 ]
             },
             {
@@ -233,7 +252,6 @@ src="https://www.facebook.com/tr?id=25919503551048968&ev=PageView&noscript=1"
             }
         ];
 
-        // Definição dos sabores disponíveis para Salgados
         const SALGADO_FLAVORS = ['Presunto e Queijo', 'Enroladinho de Salsicha'];
 
         let cart = [];
@@ -297,7 +315,6 @@ src="https://www.facebook.com/tr?id=25919503551048968&ev=PageView&noscript=1"
         }
 
         function renderFlavors() {
-            // Usa o índice 'i' para criar IDs únicos e evitar erro com nomes
             return SALGADO_FLAVORS.map((s, i) => `
                 <div class="option-row">
                     <span>${s}</span>
@@ -313,14 +330,10 @@ src="https://www.facebook.com/tr?id=25919503551048968&ev=PageView&noscript=1"
         function updateFlavor(s, delta, id) {
             const limit = tempItem.limit || 12;
             const currentTotal = Object.values(tempItem.options.flavors).reduce((a, b) => a + b, 0);
-            
             if (!tempItem.options.flavors[s]) tempItem.options.flavors[s] = 0;
-            
             const newVal = tempItem.options.flavors[s] + delta;
-
             if (newVal < 0) return;
-            if (delta > 0 && currentTotal >= limit) return; // Limite atingido
-
+            if (delta > 0 && currentTotal >= limit) return;
             tempItem.options.flavors[s] = newVal;
             document.getElementById(`qty-flavor-${id}`).innerText = newVal;
         }
@@ -361,18 +374,28 @@ src="https://www.facebook.com/tr?id=25919503551048968&ev=PageView&noscript=1"
         function removeItem(idx) { cart.splice(idx, 1); updateCartUI(); }
         function openCart() { document.getElementById('cartModal').classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function toggleChange() { document.getElementById('changeValue').className = document.getElementById('paymentMethod').value === 'dinheiro' ? '' : 'hidden'; }
+        function toggleChange() { document.getElementById('changeValue').className = document.getElementById('paymentMethod').value === 'dinheiro' ? '' : 'hidden input-field'; }
 
         function finishOrder() {
             const name = document.getElementById('clientName').value;
-            const addr = document.getElementById('clientAddress').value;
-            if (!name || !addr) { alert("Preencha seu nome e endereço para finalizar!"); return; }
+            
+            // Novos campos de endereço
+            const street = document.getElementById('addrStreet').value;
+            const num = document.getElementById('addrNum').value;
+            const district = document.getElementById('addrDistrict').value;
+            const ref = document.getElementById('addrRef').value;
+
+            if (!name || !street || !num || !district) { 
+                alert("Preencha Nome, Rua, Número e Bairro!"); 
+                return; 
+            }
 
             let total = 0;
             let msg = `*NOVO PEDIDO - DUE LOVES*\n\n`;
             msg += `*Cliente:* ${name}\n`;
-            msg += `*Endereço:* ${addr}\n\n`;
-            msg += `*ITENS DO PEDIDO:*\n`;
+            msg += `*Endereço:* ${street}, ${num} - ${district}\n`;
+            if(ref) msg += `(Ref: ${ref})\n`;
+            msg += `\n*ITENS DO PEDIDO:*\n`;
 
             cart.forEach(i => {
                 total += i.price;
@@ -405,7 +428,7 @@ src="https://www.facebook.com/tr?id=25919503551048968&ev=PageView&noscript=1"
             msg += `*Pagamento:* ${document.getElementById('paymentMethod').value.toUpperCase()}`;
             
             const change = document.getElementById('changeValue').value;
-            if (change) msg += ` (Troco para ${change})`;
+            if (change && document.getElementById('paymentMethod').value === 'dinheiro') msg += ` (Troco para ${change})`;
 
             window.open(`https://wa.me/5544997161637?text=${encodeURIComponent(msg)}`);
         }
@@ -413,5 +436,4 @@ src="https://www.facebook.com/tr?id=25919503551048968&ev=PageView&noscript=1"
         renderMenu();
     </script>
 </body>
-
 </html>
